@@ -160,6 +160,89 @@ tr:hover td { background: #f8fafc; }
 .buyer-text .buyer-kpi-sub   { font-size: 12px; color: #94a3b8; margin-top: 4px; }
 
 .buyer-charts-row { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
+
+/* ── Pipeline scroll wrapper for small screens ── */
+.pipeline-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* ── Table scroll wrapper ── */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* ──────────────────────────────────────────────
+   TABLET  (≤ 900px)
+────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  header { padding: 14px 20px; }
+  .container { padding: 16px; }
+  .filter-bar { padding: 10px 16px; }
+
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .buyer-kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .charts-row { grid-template-columns: 1fr; }
+  .buyer-charts-row { grid-template-columns: 1fr; }
+
+  .chart-container { height: 240px; }
+}
+
+/* ──────────────────────────────────────────────
+   MOBILE  (≤ 600px)
+────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  header {
+    padding: 12px 14px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  header h1 { font-size: 18px; }
+  header img { width: 52px !important; }
+  .header-right {
+    width: 100%;
+    gap: 8px;
+  }
+  .upload-btn { padding: 8px 12px; font-size: 12px; }
+  .date-badge { font-size: 11px; padding: 5px 10px; }
+
+  .filter-bar {
+    padding: 8px 12px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  .filter-label { display: none; }
+  .filter-pills { flex-wrap: nowrap; }
+
+  .container { padding: 12px; }
+
+  .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .kpi-card { padding: 14px 14px; }
+  .kpi-value { font-size: 20px; }
+  .kpi-sub { font-size: 11px; }
+
+  .buyer-kpi-row { grid-template-columns: 1fr; gap: 10px; }
+  .buyer-kpi-card { padding: 14px 16px; }
+
+  .charts-row { grid-template-columns: 1fr; gap: 12px; }
+  .buyer-charts-row { grid-template-columns: 1fr; gap: 12px; }
+  .chart-container { height: 200px; }
+
+  .pipeline-card { padding: 16px 14px; }
+  .stage-block { padding: 12px 6px; min-width: 80px; }
+  .stage-count { font-size: 22px; }
+  .stage-name { font-size: 9px; }
+  .stage-value { font-size: 9px; }
+  .stage-arrow { font-size: 16px; }
+
+  .table-card { padding: 16px 14px; }
+  th { font-size: 10px; padding: 6px 8px; }
+  td { font-size: 12px; padding: 8px 8px; }
+
+  .section-divider { margin: 16px 0 14px; }
+
+  .hint-banner { font-size: 12px; padding: 10px 14px; }
+
+  /* Hide less critical table columns on mobile */
+  .col-hide-mobile { display: none; }
+}
 </style>
 </head>
 <body>
@@ -262,7 +345,9 @@ tr:hover td { background: #f8fafc; }
 
   <div class="pipeline-card">
     <div class="section-title">Etappe (Bygg)</div>
-    <div class="pipeline" id="pipeline"></div>
+    <div class="pipeline-scroll">
+      <div class="pipeline" id="pipeline"></div>
+    </div>
   </div>
 
   <div class="charts-row">
@@ -278,20 +363,22 @@ tr:hover td { background: #f8fafc; }
 
   <div class="table-card">
     <div class="section-title">Seksjonsoversikt</div>
-    <table>
-      <thead>
-        <tr>
-          <th>Prosjekt</th>
-          <th style="text-align:center">Seksjon</th>
-          <th>Kjøper</th>
-          <th>Type</th>
-          <th>Status</th>
-          <th style="text-align:right">Pris</th>
-          <th>Etappe</th>
-        </tr>
-      </thead>
-      <tbody id="project-table"></tbody>
-    </table>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Prosjekt</th>
+            <th style="text-align:center">Seksjon</th>
+            <th class="col-hide-mobile">Kjøper</th>
+            <th class="col-hide-mobile">Type</th>
+            <th>Status</th>
+            <th style="text-align:right">Pris</th>
+            <th class="col-hide-mobile">Etappe</th>
+          </tr>
+        </thead>
+        <tbody id="project-table"></tbody>
+      </table>
+    </div>
   </div>
 
   <div class="section-divider"><span>Kjøpertype analyse</span></div>
@@ -692,16 +779,16 @@ function render(data) {
     tr.innerHTML = `
       <td style="font-size:13px;color:#475569">${sec.a}</td>
       <td style="text-align:center;font-weight:700">${sec.seksjonsnr||'–'}</td>
-      <td style="font-weight:600">${sec.kjøper||'–'}</td>
-      <td><span style="${buyerStyle}">${buyerLabel}</span></td>
+      <td class="col-hide-mobile" style="font-weight:600">${sec.kjøper||'–'}</td>
+      <td class="col-hide-mobile"><span style="${buyerStyle}">${buyerLabel}</span></td>
       <td><div class="dot-group"><div class="dot dot-${dotClass}"></div>${sec.status||'–'}</div></td>
       <td style="text-align:right">${sec.price?fmtM(sec.price):'–'}</td>
-      <td><span class="badge badge-${STAGE_CLASS[sec.stage]||'ukjent'}">${STAGE_LABEL[sec.stage]||sec.stage||'–'}</span></td>`;
+      <td class="col-hide-mobile"><span class="badge badge-${STAGE_CLASS[sec.stage]||'ukjent'}">${STAGE_LABEL[sec.stage]||sec.stage||'–'}</span></td>`;
     tbody.appendChild(tr);
   });
   if (!allSections.length) {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td colspan="7" style="text-align:center;color:#94a3b8;padding:24px">Ingen seksjoner — last inn masterfil for å se data</td>`;
+    tr.innerHTML = `<td colspan="7" style="text-align:center;color:#94a3b8;padding:24px;white-space:normal">Ingen seksjoner — last inn masterfil for å se data</td>`;
     tbody.appendChild(tr);
   }
 
