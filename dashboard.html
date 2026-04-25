@@ -816,12 +816,19 @@ function loadData(data, filename) {
   render(data);
   document.getElementById('update-status').textContent = `Oppdatert ${new Date().toLocaleTimeString('nb-NO')} — ${data.length} rader`;
   document.getElementById('file-name').textContent = filename;
+  localStorage.setItem('lastUploadedFile', filename);
   document.getElementById('hint-banner').style.display = 'none';
 }
 
 // ─── Date ─────────────────────────────────────────────────────────────────
 document.getElementById('datestamp').textContent =
   new Date().toLocaleDateString('nb-NO', {day:'numeric', month:'long', year:'numeric'});
+
+// ─── Restore last uploaded filename ────────────────────────────────────────
+const lastFile = localStorage.getItem('lastUploadedFile');
+if (lastFile) {
+  document.getElementById('file-name').textContent = lastFile;
+}
 
 // ─── Default demo data (matches MASTERFIL structure) ──────────────────────
 const defaultData = [
