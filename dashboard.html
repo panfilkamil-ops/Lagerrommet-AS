@@ -804,6 +804,7 @@ function loadData(data, filename) {
   document.getElementById('update-status').textContent = `Oppdatert ${new Date().toLocaleTimeString('nb-NO')} — ${data.length} rader`;
   document.getElementById('file-name').textContent = filename;
   localStorage.setItem('lastUploadedFile', filename);
+  localStorage.setItem('lastUploadedData', JSON.stringify(data));
   document.getElementById('hint-banner').style.display = 'none';
 }
 
@@ -944,9 +945,18 @@ function generatePDF() {
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────
-allData = defaultData;
-buildFilterPills(defaultData);
-render(defaultData);
+const savedData = localStorage.getItem('lastUploadedData');
+if (savedData) {
+  try {
+    allData = JSON.parse(savedData);
+  } catch (e) {
+    allData = defaultData;
+  }
+} else {
+  allData = defaultData;
+}
+buildFilterPills(allData);
+render(allData);
 </script>
 </body>
 </html>
