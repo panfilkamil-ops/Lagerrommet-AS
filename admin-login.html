@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lagerrommet - Admin Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f2d5e 0%, #1a4a8a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #1e293b;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 16px;
+            padding: 48px 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .logo-svg {
+            width: 50px;
+            height: 50px;
+        }
+
+        .logo-text h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .logo-text p {
+            font-size: 12px;
+            color: #64748b;
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #0f2d5e 0%, #1a4a8a 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(15, 45, 94, 0.3);
+        }
+
+        .error-message {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            color: #991b1b;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .info-text {
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 16px;
+        }
+
+        .back-link {
+            text-align: center;
+            font-size: 12px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .back-link a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo-section">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 960" preserveAspectRatio="xMidYMid meet" class="logo-svg">
+                <defs>
+                    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <rect width="1440" height="960" fill="url(#brandGrad)"/>
+                <g fill="#ecebe7" opacity="0.95">
+                    <rect x="50" y="200" width="200" height="400" rx="10"/>
+                    <rect x="300" y="100" width="200" height="500" rx="10"/>
+                    <rect x="550" y="250" width="200" height="350" rx="10"/>
+                </g>
+            </svg>
+            <div class="logo-text">
+                <h1>Lagerrommet</h1>
+                <p>Admin Panel</p>
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMsg"></div>
+
+        <form id="loginForm" onsubmit="handleAdminLogin(event)">
+            <div class="form-group">
+                <label for="password">Admin Passord</label>
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Skriv inn admin passord"
+                    autofocus
+                    required
+                >
+            </div>
+            <button type="submit" class="login-btn">Logg inn som Admin</button>
+        </form>
+
+        <div class="info-text">
+            Sikret administrasjonspanel
+        </div>
+
+        <div class="back-link">
+            <a href="index.html">← Tilbake til dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PASSWORD = 'admin2025';
+
+        function handleAdminLogin(event) {
+            event.preventDefault();
+            const passwordInput = document.getElementById('password');
+            const password = passwordInput.value;
+            const errorMsg = document.getElementById('errorMsg');
+
+            if (password === ADMIN_PASSWORD) {
+                sessionStorage.setItem('admin_authenticated', 'true');
+                sessionStorage.setItem('admin_user', 'admin');
+                window.location.href = 'admin.html';
+            } else {
+                errorMsg.textContent = 'Feil admin passord. Prøv igjen.';
+                errorMsg.classList.add('show');
+                passwordInput.value = '';
+                passwordInput.focus();
+
+                setTimeout(() => {
+                    errorMsg.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        window.addEventListener('load', () => {
+            if (sessionStorage.getItem('admin_authenticated') === 'true') {
+                window.location.href = 'admin.html';
+            }
+        });
+    </script>
+</body>
+</html>

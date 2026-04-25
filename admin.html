@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lagerrommet - Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #0f2d5e 0%, #1a4a8a 100%);
+            color: white;
+            padding: 20px 32px;
+            border-radius: 12px;
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: #1d4ed8;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e40af;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .btn-danger:hover {
+            background: #fecaca;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            display: inline-block;
+            margin-right: 16px;
+            margin-bottom: 16px;
+            min-width: 150px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .user-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .user-meta {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>🏢 Lagerrommet Admin Panel</h1>
+                <p>Administrer dashboards, brukere og passord</p>
+            </div>
+            <button class="logout-btn" onclick="adminLogout()">Logg ut</button>
+        </header>
+
+        <div class="section">
+            <div class="section-title">📊 Statistikk</div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-dashboards">1</div>
+                <div class="stat-label">Dashboards</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-users">4</div>
+                <div class="stat-label">Brukere</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">➕ Legg til Ny Bruker</div>
+            <div style="max-width: 500px;">
+                <div class="form-group">
+                    <label for="new-username">Brukernavn</label>
+                    <input type="text" id="new-username" placeholder="F.eks. ole, kari">
+                </div>
+                <div class="form-group">
+                    <label for="new-password">Passord (min 8 tegn)</label>
+                    <input type="password" id="new-password" placeholder="Sterkt passord">
+                </div>
+                <button class="btn btn-primary" onclick="addUser()">+ Legg til Bruker</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">👥 Administrer Brukere</div>
+            <div id="users-list">
+                <p style="color: #64748b;">Laster brukere...</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">📝 GitHub Upload</div>
+            <p style="margin-bottom: 12px; line-height: 1.6;">
+                Når du gjør endringer i admin panelet, må du commit og push til GitHub:
+            </p>
+            <div style="background: #1e293b; color: #e2e8f0; padding: 16px; border-radius: 8px; font-family: monospace; font-size: 12px; overflow-x: auto;">
+                git add .<br>
+                git commit -m "Update users and dashboards"<br>
+                git push origin main
+            </div>
+            <p style="margin-top: 12px; font-size: 12px; color: #64748b;">
+                GitHub Pages oppdateres automatisk innen 1-2 minutter.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function checkAdminAuth() {
+            if (sessionStorage.getItem('admin_authenticated') !== 'true') {
+                window.location.href = 'admin-login.html';
+            }
+        }
+
+        function loadUsers() {
+            const users = JSON.parse(localStorage.getItem('panel_users')) || [
+                { username: 'admin', password: 'lagerrommet2025' },
+                { username: 'kamil', password: 'kamil123' },
+                { username: 'john', password: 'john456' },
+                { username: 'hanne', password: 'hanne789' }
+            ];
+
+            const list = document.getElementById('users-list');
+            list.innerHTML = users.map(user => `
+                <div class="user-item">
+                    <div class="user-info">
+                        <div class="user-name">${user.username}</div>
+                        <div class="user-meta">Passord: ${user.password}</div>
+                    </div>
+                    <div class="user-actions">
+                        <button class="btn btn-danger" style="padding: 6px 12px; font-size: 11px;" onclick="deleteUser('${user.username}')">Slett</button>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('stat-users').textContent = users.length;
+        }
+
+        function addUser() {
+            const username = document.getElementById('new-username').value.trim();
+            const password = document.getElementById('new-password').value.trim();
+
+            if (!username || !password || password.length < 8) {
+                alert('Fyll inn brukernavn og passord (min 8 tegn)');
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('panel_users')) || [];
+            if (users.some(u => u.username === username)) {
+                alert('Bruker finnes allerede');
+                return;
+            }
+
+            users.push({ username, password });
+            localStorage.setItem('panel_users', JSON.stringify(users));
+
+            document.getElementById('new-username').value = '';
+            document.getElementById('new-password').value = '';
+
+            loadUsers();
+            alert('Bruker opprettet! Husk å commit og push til GitHub.');
+        }
+
+        function deleteUser(username) {
+            if (username === 'admin') {
+                alert('Du kan ikke slette admin-brukeren');
+                return;
+            }
+
+            if (confirm(`Slett bruker "${username}"?`)) {
+                const users = JSON.parse(localStorage.getItem('panel_users')) || [];
+                const filtered = users.filter(u => u.username !== username);
+                localStorage.setItem('panel_users', JSON.stringify(filtered));
+                loadUsers();
+                alert('Bruker slettet! Husk å commit og push til GitHub.');
+            }
+        }
+
+        function adminLogout() {
+            if (confirm('Logg ut?')) {
+                sessionStorage.removeItem('admin_authenticated');
+                window.location.href = 'admin-login.html';
+            }
+        }
+
+        window.addEventListener('load', () => {
+            checkAdminAuth();
+            loadUsers();
+        });
+    </script>
+</body>
+</html>
