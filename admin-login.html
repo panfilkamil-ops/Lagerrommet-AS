@@ -222,7 +222,7 @@
             if (password === ADMIN_PASSWORD) {
                 sessionStorage.setItem('admin_authenticated', 'true');
                 sessionStorage.setItem('admin_user', 'admin');
-                window.location.href = 'admin.html';
+                window.location.href = 'dashboard.html';
             } else {
                 errorMsg.textContent = 'Feil admin passord. Prøv igjen.';
                 errorMsg.classList.add('show');
