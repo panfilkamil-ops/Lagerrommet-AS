@@ -424,9 +424,13 @@ tr:hover td { background: #f8fafc; }
 </div>
 
 <script>
+// Require login — redirect to login page if not authenticated
+if (sessionStorage.getItem('admin_authenticated') !== 'true') {
+  window.location.replace('admin-login.html');
+}
+
 function logout() {
   sessionStorage.removeItem('admin_authenticated');
-  sessionStorage.removeItem('admin_user');
   window.location.href = 'admin-login.html';
 }
 
