@@ -267,6 +267,10 @@ tr:hover td { background: #f8fafc; }
       </label>
       <div id="file-name" style="font-size:11px;opacity:0.55;text-align:center;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
     </div>
+    <button class="upload-btn" id="publish-btn" onclick="publishForAll()" style="background:#0891b2;display:none">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+      Publiser for alle
+    </button>
     <button class="upload-btn" onclick="generatePDF()" style="background:#6366f1">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
       📄 Generer rapport
@@ -432,6 +436,91 @@ if (sessionStorage.getItem('admin_authenticated') !== 'true') {
 function logout() {
   sessionStorage.removeItem('admin_authenticated');
   window.location.href = 'admin-login.html';
+}
+
+// ─── Load shared data from data.json (served by GitHub Pages) ────────────────
+async function loadSharedData() {
+  try {
+    const res = await fetch('data.json?nc=' + Date.now());
+    if (!res.ok) return false;
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) return false;
+    allData = data;
+    currentFilter = 'all';
+    buildFilterPills(allData);
+    render(allData);
+    document.getElementById('update-status').textContent = 'Delte data lastet';
+    document.getElementById('hint-banner').style.display = 'none';
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+// ─── Publish data to data.json via GitHub API ─────────────────────────────────
+async function publishForAll() {
+  if (!allData.length) { alert('Ingen data å publisere. Last inn Excel-filen først.'); return; }
+
+  let token = localStorage.getItem('gh_pat');
+  if (!token) {
+    token = prompt(
+      'Skriv inn GitHub Personal Access Token (gjøres kun én gang):\n\n' +
+      'Slik lager du det:\n' +
+      '1. Gå til github.com → Settings → Developer settings\n' +
+      '2. Personal access tokens → Tokens (classic) → Generate new token\n' +
+      '3. Huk av "repo" → Generate token\n' +
+      '4. Kopier og lim inn her:'
+    );
+    if (!token) return;
+    localStorage.setItem('gh_pat', token.trim());
+    token = token.trim();
+  }
+
+  const REPO = 'panfilkamil-ops/Lagerrommet-AS';
+  const btn  = document.getElementById('publish-btn');
+  const orig = btn.innerHTML;
+  btn.innerHTML = '⏳ Publiserer…';
+  btn.disabled  = true;
+
+  try {
+    const shaRes = await fetch(`https://api.github.com/repos/${REPO}/contents/data.json`, {
+      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+    });
+    const shaData = shaRes.ok ? await shaRes.json() : {};
+
+    // Base64-encode with proper handling of Norwegian chars
+    const jsonStr = JSON.stringify(allData);
+    const base64  = btoa(unescape(encodeURIComponent(jsonStr)));
+
+    const putRes = await fetch(`https://api.github.com/repos/${REPO}/contents/data.json`, {
+      method: 'PUT',
+      headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json', Accept: 'application/vnd.github.v3+json' },
+      body: JSON.stringify({
+        message: `Oppdater data – ${new Date().toLocaleString('nb-NO')}`,
+        content: base64,
+        sha: shaData.sha
+      })
+    });
+
+    if (putRes.ok) {
+      document.getElementById('update-status').textContent =
+        `Publisert ${new Date().toLocaleTimeString('nb-NO')} — kollegene ser data om ~1 min`;
+      btn.innerHTML = '✓ Publisert!';
+      setTimeout(() => { btn.innerHTML = orig; btn.disabled = false; }, 4000);
+    } else {
+      const err = await putRes.json();
+      if (putRes.status === 401) {
+        localStorage.removeItem('gh_pat');
+        alert('Ugyldig token — slettet. Prøv igjen og skriv inn et gyldig token.');
+      } else {
+        alert('Feil ved publisering: ' + (err.message || putRes.status));
+      }
+      btn.innerHTML = orig; btn.disabled = false;
+    }
+  } catch (e) {
+    alert('Nettverksfeil: ' + e.message);
+    btn.innerHTML = orig; btn.disabled = false;
+  }
 }
 
 // ─── Chart instances ───────────────────────────────────────────────────────
@@ -897,6 +986,9 @@ function loadData(data, filename) {
   localStorage.setItem('lastUploadedFile', filename);
   localStorage.setItem('lastUploadedData', JSON.stringify(data));
   document.getElementById('hint-banner').style.display = 'none';
+  // Show publish button so admin can share with colleagues
+  const publishBtn = document.getElementById('publish-btn');
+  publishBtn.style.display = 'inline-flex';
 }
 
 // ─── Date ─────────────────────────────────────────────────────────────────
@@ -1036,18 +1128,23 @@ function generatePDF() {
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────
-const savedData = localStorage.getItem('lastUploadedData');
-if (savedData) {
-  try {
-    allData = JSON.parse(savedData);
-  } catch (e) {
-    allData = defaultData;
+(async () => {
+  const sharedLoaded = await loadSharedData();
+  if (!sharedLoaded) {
+    const savedData = localStorage.getItem('lastUploadedData');
+    if (savedData) {
+      try {
+        allData = JSON.parse(savedData);
+      } catch (e) {
+        allData = defaultData;
+      }
+    } else {
+      allData = defaultData;
+    }
+    buildFilterPills(allData);
+    render(allData);
   }
-} else {
-  allData = defaultData;
-}
-buildFilterPills(allData);
-render(allData);
+})();
 </script>
 </body>
 </html>
